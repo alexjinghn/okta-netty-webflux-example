@@ -1,5 +1,6 @@
 package com.test.netty.server;
 
+import com.test.netty.common.FutureListener;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -52,7 +53,9 @@ public final class AppServer {
 					});
 
 			// Start the server.
-			ChannelFuture f = b.bind(PORT).sync();
+			ChannelFuture f = b.bind(PORT);
+			f.addListener(new FutureListener());
+			f = f.sync();
 			logger.info("Chat Server started. Ready to accept chat clients.");
 
 			// Wait until the server socket is closed.

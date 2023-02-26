@@ -7,6 +7,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.test.netty.common.FutureListener;
 import com.test.netty.server.AppServer;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -88,11 +89,16 @@ public class Client {
 		}
 
 		private void start(String address, int port) throws InterruptedException {
-			f = bootstrap.connect(address, port).sync();
+			f = bootstrap.connect(address, port);
+			f.addListener(new FutureListener());
+			f = f.sync();
+			logger.info("obtained channel future " + f);
 		}
 
 		private void send(String msg) throws InterruptedException {
+			logger.info("channel future " + f);
 			Channel channel = f.sync().channel();
+			logger.info("get hold of channel " + channel);
 			channel.writeAndFlush("[client]: " + msg);
 			channel.flush();
 		}
