@@ -3,14 +3,19 @@ package com.test.netty.server;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.test.netty.client.ClientHandler;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Handles a server-side channel.
  */
 public class ServerHandler extends SimpleChannelInboundHandler<String> {
+
+	private static Logger logger = LoggerFactory.getLogger(ServerHandler.class);
 
 	// List of connected client channels.
 	static final List<Channel> channels = new ArrayList<Channel>();
@@ -21,7 +26,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
 	 */
 	@Override
 	public void channelActive(final ChannelHandlerContext ctx) {
-		System.out.println("Client joined - " + ctx);
+		logger.info("Client joined - " + ctx);
 		channels.add(ctx.channel());
 	}
 
@@ -33,7 +38,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
 	 */
 	@Override
 	public void channelRead0(ChannelHandlerContext ctx, String msg) throws Exception {
-		System.out.println("Server received - " + msg);
+		logger.info("Server received - " + msg);
 		for (Channel c : channels) {
 			c.writeAndFlush("-> " + msg + '\n');
 		}
@@ -45,7 +50,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
 	 */
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-		System.out.println("Closing connection for client - " + ctx);
+		logger.info("Closing connection for client - " + ctx);
 		ctx.close();
 	}
 }

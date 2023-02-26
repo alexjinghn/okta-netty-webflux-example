@@ -10,8 +10,12 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class AppServer {
+	private static Logger logger = LoggerFactory.getLogger(AppServer.class);
+
 
 	// Port where chat server will listen for connections.
 	static final int PORT = 8007;
@@ -49,7 +53,7 @@ public final class AppServer {
 
 			// Start the server.
 			ChannelFuture f = b.bind(PORT).sync();
-			System.out.println("Chat Server started. Ready to accept chat clients.");
+			logger.info("Chat Server started. Ready to accept chat clients.");
 
 			// Wait until the server socket is closed.
 			f.channel().closeFuture().sync();

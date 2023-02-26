@@ -7,6 +7,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.test.netty.server.AppServer;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -18,8 +19,12 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Client {
+
+	private static Logger logger = LoggerFactory.getLogger(Client.class);
 
 	static final String HOST = "127.0.0.1";
 	static final int PORT = 8007;
@@ -35,7 +40,7 @@ public class Client {
 			executorService.scheduleAtFixedRate(() -> {
 				try {
 					int idx = index.getAndIncrement();
-					System.out.println("index is " + idx);
+					logger.info("index is " + idx);
 					client.send("" + idx);
 				} catch (Exception e) {
 
