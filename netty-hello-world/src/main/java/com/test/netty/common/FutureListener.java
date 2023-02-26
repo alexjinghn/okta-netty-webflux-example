@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FutureListener implements GenericFutureListener {
-    private static Logger logger = LoggerFactory.getLogger(Client.class);
+    private static Logger logger = LoggerFactory.getLogger(FutureListener.class);
 
     @Override
     public void operationComplete(Future future) throws Exception {
