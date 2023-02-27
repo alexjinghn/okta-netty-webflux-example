@@ -97,13 +97,13 @@ public class Client {
 					try {
 						bootstrap.config().group().shutdownGracefully();
 						group = new NioEventLoopGroup();
-						bootstrap.group(group);
+						bootstrap = bootstrap.clone(group);
 						f = bootstrap.connect(address, port);
 						f.addListener(new FutureListener());
 						f = f.sync();
 						logger.info("restarted channel " + f);
-					} catch (InterruptedException e) {
-						throw new RuntimeException(e);
+					} catch (Exception e) {
+						logger.info("failed to restart client", e);
 					}
 				}
 
