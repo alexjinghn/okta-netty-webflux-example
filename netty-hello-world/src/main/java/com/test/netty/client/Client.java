@@ -95,6 +95,9 @@ public class Client {
 			RestoreHealer.registerCallback(() -> {
 				synchronized (f) {
 					try {
+						bootstrap.config().group().shutdownGracefully();
+						group = new NioEventLoopGroup();
+						bootstrap.group(group);
 						f = bootstrap.connect(address, port);
 						f.addListener(new FutureListener());
 						f = f.sync();

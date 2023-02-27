@@ -46,7 +46,7 @@ public class RestoreHealer {
                 try {
                     entry.getKey().run();
                 } catch (Exception e) {
-                    logger.warn("Failed to invoke callback " + entry.getKey());
+                    logger.warn("Failed to invoke callback " + entry.getKey(), e);
                 }
             }
         }
