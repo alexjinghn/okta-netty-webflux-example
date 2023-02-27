@@ -26,14 +26,37 @@ public final class AppServer {
 		/*
 		 * Configure the server.
 		 */
-
-		// Create boss & worker groups. Boss accepts connections from client. Worker
-		// handles further communication through connections.
-		EventLoopGroup bossGroup = new NioEventLoopGroup(1);
-		EventLoopGroup workerGroup = new NioEventLoopGroup();
-
+		Server server = new Server("localhost", PORT);
 		try {
-			ServerBootstrap b = new ServerBootstrap();
+			server.start();
+			server.awaitTerminate();
+		} finally {
+			server.shutdown();
+		}
+	}
+
+	public static void main(String[] args) throws Exception {
+		new AppServer().run();
+	}
+
+	private class Server {
+		String address;
+		int port;
+
+		EventLoopGroup bossGroup;
+		EventLoopGroup workerGroup;
+
+		ChannelFuture f;
+		ServerBootstrap b;
+
+		Server(String _address, int _port) {
+			address = _address;
+			port = _port;
+
+			bossGroup = new NioEventLoopGroup(1);
+			workerGroup = new NioEventLoopGroup();
+
+			b = new ServerBootstrap();
 			b.group(bossGroup, workerGroup) // Set boss & worker groups
 					.channel(NioServerSocketChannel.class)// Use NIO to accept new connections.
 					.childHandler(new ChannelInitializer<SocketChannel>() {
@@ -51,23 +74,26 @@ public final class AppServer {
 							p.addLast(new ServerHandler());
 						}
 					});
+		}
 
+		public void start() throws InterruptedException {
 			// Start the server.
-			ChannelFuture f = b.bind(PORT);
+			f = b.bind(PORT);
 			f.addListener(new FutureListener());
 			f = f.sync();
 			logger.info("Chat Server started. Ready to accept chat clients.");
+		}
 
+		public void awaitTerminate() throws InterruptedException {
 			// Wait until the server socket is closed.
 			f.channel().closeFuture().sync();
-		} finally {
-			// Shut down all event loops to terminate all threads.
+		}
+
+		public void shutdown() throws InterruptedException {
+			f.channel().closeFuture().sync();
 			bossGroup.shutdownGracefully();
 			workerGroup.shutdownGracefully();
 		}
 	}
 
-	public static void main(String[] args) throws Exception {
-		new AppServer().run();
-	}
 }
