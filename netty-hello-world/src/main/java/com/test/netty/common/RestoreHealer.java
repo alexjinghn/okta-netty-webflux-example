@@ -41,6 +41,7 @@ public class RestoreHealer {
     }
 
     private static void heal(int targetPriority) {
+        logger.info("invoking callbacks of priority " + targetPriority);
         for (Map.Entry<Runnable, Integer> entry : callbacks.entrySet()) {
             if (entry.getValue().equals(targetPriority)) {
                 try {
@@ -57,6 +58,7 @@ public class RestoreHealer {
             start();
             started = true;
         }
+        logger.info("registering callback " + cb + " with priority " + priority);
         callbacks.put(cb, priority);
     }
 }
