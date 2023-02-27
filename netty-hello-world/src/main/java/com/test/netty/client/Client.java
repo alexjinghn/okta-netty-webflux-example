@@ -82,6 +82,8 @@ public class Client {
 							 * Socket/channel communication happens in byte streams. String decoder &
 							 * encoder helps conversion between bytes & String.
 							 */
+							// 1000s of channel timeout
+							ch.config().setConnectTimeoutMillis(1000000);
 							p.addLast(new StringDecoder());
 							p.addLast(new StringEncoder());
 
@@ -93,14 +95,17 @@ public class Client {
 
 			// Start the client.
 			RestoreHealer.registerCallback(() -> {
+				logger.info("start resetting client");
 				synchronized (f) {
 					try {
 						bootstrap.config().group().shutdownGracefully();
 						group = new NioEventLoopGroup();
 						bootstrap = bootstrap.clone(group);
+						logger.info("creating new connection to " + address + ":" + port);
 						f = bootstrap.connect(address, port);
 						f.addListener(new FutureListener());
 						f = f.sync();
+						logger.info("created new connection to " + address + ":" + port);
 						logger.info("restarted channel " + f);
 					} catch (Exception e) {
 						logger.info("failed to restart client", e);
