@@ -63,6 +63,8 @@ public class Client {
 		EventLoopGroup group;
 		ChannelFuture f;
 
+		Object cfLock = new Object();
+
 		String address;
 		int port;
 
@@ -96,7 +98,7 @@ public class Client {
 			// Start the client.
 			RestoreHealer.registerCallback(() -> {
 				logger.info("start resetting client");
-				synchronized (f) {
+				synchronized (cfLock) {
 					try {
 						bootstrap.config().group().shutdownGracefully();
 						group = new NioEventLoopGroup();
@@ -116,10 +118,12 @@ public class Client {
 		}
 
 		private void start() throws InterruptedException {
-			f = bootstrap.connect(address, port);
-			f.addListener(new FutureListener());
-			f = f.sync();
-			logger.info("obtained channel future " + f);
+			synchronized (cfLock) {
+				f = bootstrap.connect(address, port);
+				f.addListener(new FutureListener());
+				f = f.sync();
+				logger.info("obtained channel future " + f);
+			}
 		}
 
 		private void send(String msg) throws InterruptedException {
