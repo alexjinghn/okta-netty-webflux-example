@@ -31,9 +31,11 @@ public class RestoreHealer {
             File restore1 = new File(RESTORE1);
             if (restore0.exists() && !restored0) {
                 heal(0);
+                restored0 = true;
             }
             if (restore1.exists() && !restored1) {
                 heal(1);
+                restored1 = true;
             }
         }, 0, 100, TimeUnit.MILLISECONDS);
     }
