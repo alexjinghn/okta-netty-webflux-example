@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.test.netty.common.FutureListener;
+import com.test.netty.common.RestoreHealer;
 import com.test.netty.server.AppServer;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -34,9 +35,9 @@ public class Client {
 	private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
 	public void run() throws Exception {
-		SimpleClient client = new SimpleClient();
+		SimpleClient client = new SimpleClient(HOST, PORT);
 		try {
-			client.start(HOST, PORT);
+			client.start();
 
 			executorService.scheduleAtFixedRate(() -> {
 				try {
@@ -62,7 +63,12 @@ public class Client {
 		EventLoopGroup group;
 		ChannelFuture f;
 
-		SimpleClient() {
+		String address;
+		int port;
+
+		SimpleClient(String _address, int _port) {
+			address = _address;
+			port = _port;
 			// Since this is client, it doesn't need boss group. Create single group.
 		 	group = new NioEventLoopGroup();
 			bootstrap = new Bootstrap();
@@ -86,9 +92,22 @@ public class Client {
 					});
 
 			// Start the client.
+			RestoreHealer.registerCallback(() -> {
+				synchronized (f) {
+					try {
+						f = bootstrap.connect(address, port);
+						f.addListener(new FutureListener());
+						f = f.sync();
+						logger.info("restarted channel " + f);
+					} catch (InterruptedException e) {
+						throw new RuntimeException(e);
+					}
+				}
+
+			}, 1);
 		}
 
-		private void start(String address, int port) throws InterruptedException {
+		private void start() throws InterruptedException {
 			f = bootstrap.connect(address, port);
 			f.addListener(new FutureListener());
 			f = f.sync();
@@ -98,7 +117,7 @@ public class Client {
 		private void send(String msg) throws InterruptedException {
 			logger.info("channel future " + f);
 			Channel channel = f.sync().channel();
-			logger.info("get hold of channel " + channel);
+			logger.info("get hold of channel " + channel + " class " + channel.getClass());
 			channel.writeAndFlush("[client]: " + msg);
 			channel.flush();
 		}
